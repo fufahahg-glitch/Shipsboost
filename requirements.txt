@@ -1,3 +1,22 @@
-# Runtime: pure stdlib, no dependencies.
+# Runtime: pure stdlib (Tk, urllib, json, csv, pickle, xml.etree).
+# Everything below is OPTIONAL — the app degrades gracefully without them.
+
 # Build-only:
 pyinstaller>=6.0
+
+# Optional — only needed for true GRIB decode. Without it grib_loader runs in
+# header-only mode (file is recognized, structure is parsed, fields not extracted).
+# Requires the ecCodes system library at runtime.
+# pygrib>=2.1
+
+# Optional — enables a future raster wind-field overlay. Tk canvas vector
+# arrows are used by default.
+# pillow>=10.0
+
+# Optional — IANA tz support beyond stdlib zoneinfo (only needed on Windows
+# without tzdata installed).
+# tzdata>=2024.1
+
+# Optional — vectorized weather interpolation. The stdlib path is used by
+# default and is fast enough for hundreds of waypoints.
+# numpy>=1.26
