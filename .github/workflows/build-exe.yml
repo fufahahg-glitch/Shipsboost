@@ -1,0 +1,74 @@
+name: Build executable
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: marine-route-optimizer.exe
+            asset: marine-route-optimizer-windows.exe
+          - os: ubuntu-latest
+            artifact: marine-route-optimizer
+            asset: marine-route-optimizer-linux
+          - os: macos-latest
+            artifact: marine-route-optimizer
+            asset: marine-route-optimizer-macos
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Smoke-test the app
+        run: python main.py --demo
+
+      - name: Build executable
+        run: python -m PyInstaller --onefile --name marine-route-optimizer --clean main.py
+
+      - name: Rename artifact
+        shell: bash
+        run: |
+          cd dist
+          mv "${{ matrix.artifact }}" "${{ matrix.asset }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/${{ matrix.asset }}
+
+  release:
+    name: Attach binaries to release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

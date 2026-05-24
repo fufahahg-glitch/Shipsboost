@@ -1,0 +1,3 @@
+# Runtime: pure stdlib, no dependencies.
+# Build-only:
+pyinstaller>=6.0
