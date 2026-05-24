@@ -1,25 +1,36 @@
-# Marine Route Optimizer AI
+# Marine Route Optimizer
 
-Computes a near-optimal voyage through a set of waypoints using great-circle
-(haversine) distance. The solver uses nearest-neighbor construction followed
-by 2-opt refinement — fast, deterministic, and pure-stdlib (no runtime
-dependencies).
+Desktop app that computes a near-optimal voyage through a set of waypoints
+using great-circle (haversine) distance, nearest-neighbor seeding, and 2-opt
+refinement.
+
+The GUI is built with Tkinter (Python stdlib) so the produced `.exe` has no
+external runtime dependencies.
+
+## Features
+
+- Add / edit / remove / reorder waypoints in a table.
+- Load waypoints from CSV or JSON; save to CSV.
+- Built-in demo dataset (European ports).
+- Vessel-type presets with cruising speeds (container ship, tanker, yacht, ...).
+- Optional return-to-start (closed loop).
+- Visual route preview on an equirectangular projection.
+- ETA estimate from total distance and selected speed.
 
 ## Run from source
 
 ```bash
-python3 main.py --demo
-python3 main.py examples/ports.csv --loop
+python3 main.py              # launch the GUI
+python3 main.py --cli --demo # one-shot console mode
+python3 main.py --cli examples/ports.csv --loop --speed 18
 ```
 
-Input files can be CSV (`name,lat,lon` header optional) or JSON
-(`[{"name": ..., "lat": ..., "lon": ...}, ...]`).
+CSV header is optional; expected columns are `name,lat,lon`. JSON format is
+`[{"name": ..., "lat": ..., "lon": ...}, ...]`.
 
-## Build an executable
+## Build the executable
 
-PyInstaller produces a single-file binary per platform (`.exe` on Windows).
-
-### Locally
+PyInstaller produces a single windowed binary (no console flash) per platform.
 
 ```bash
 # Linux / macOS
@@ -29,17 +40,16 @@ PyInstaller produces a single-file binary per platform (`.exe` on Windows).
 build.bat
 ```
 
-Output is placed in `dist/` (`marine-route-optimizer` or
-`marine-route-optimizer.exe`).
+Output lands in `dist/`:
 
-### On every push (GitHub Actions)
+| Platform | File |
+|----------|------|
+| Windows  | `dist\MarineRouteOptimizer.exe` |
+| macOS    | `dist/MarineRouteOptimizer` (app) |
+| Linux    | `dist/MarineRouteOptimizer` |
 
-`.github/workflows/build-exe.yml` builds Windows, Linux, and macOS binaries on
-every push and pull request. Pushing a tag like `v1.0.0` additionally attaches
-the binaries to a GitHub Release.
+## Build via GitHub Actions
 
-| Trigger             | Result                                             |
-| ------------------- | -------------------------------------------------- |
-| push / PR to `main` | Uploads each binary as a workflow artifact         |
-| tag `v*`            | Attaches binaries to the matching GitHub Release   |
-| `workflow_dispatch` | Manual run from the Actions tab                    |
+`.github/workflows/build-exe.yml` runs on every push / PR and produces all
+three platform binaries as workflow artifacts. Pushing a tag like `v1.0.0`
+additionally attaches them to a GitHub Release.
